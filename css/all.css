@@ -1,0 +1,102 @@
+* {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+.fitparent {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+#bodyPage {
+  width: 100%;
+  height: 100%;
+  background: #f1f1f1;
+}
+.transition-medium {
+  -webkit-transition: 0.5s all linear;
+  -moz-transition: 0.5s all linear;
+  -o-transition: 0.5s all linear;
+  -ms-transition: 0.5s all linear;
+  transition: 0.5s all linear;
+}
+.MainScreen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.MainScreen .MainScreen-header {
+  position: absolute;
+  width: 100%;
+  height: 45px;
+}
+.MainScreen .MainScreen-main {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  top: 50px;
+  overflow: auto;
+}
+.ReportHeader .navbar-inner .brand {
+  margin-left: 0px;
+}
+.ReportHeader .nav {
+  height: 38px;
+}
+.ReportHeader .nav li {
+  cursor: pointer;
+  height: 100%;
+  line-height: 38px;
+  padding: 0 10px;
+  color: #999999;
+}
+.ReportHeader .nav li:hover {
+  color: #ffffff;
+}
+.ReportHeader .nav li.active {
+  text-decoration: none;
+  height: 100%;
+  color: #ffffff;
+}
+.UserWeightD3Cluster {
+  margin: 10px;
+}
+.UserWeightD3Cluster .dataView {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.UserWeightD3Cluster path.arc {
+  fill: #fff;
+}
+.UserWeightD3Cluster .node {
+  font-size: 12px;
+  pointer-events: none;
+}
+.UserWeightD3Cluster circle.nodes {
+  stroke: #FB4100;
+  stroke-width: 1.5px;
+  cursor: pointer;
+}
+.UserWeightD3Cluster circle.origin {
+  stroke: #CCC;
+  stroke-width: 1px;
+}
+.UserWeightD3Cluster .link {
+  stroke: #CCC;
+  stroke-width: 1.5px;
+}
+
