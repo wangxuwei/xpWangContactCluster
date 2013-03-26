@@ -40,7 +40,8 @@
     function createContainer(data){
       var view = this;
       var stage = view.stage;
-      var baseLineLen = 20;
+      var weightPerLength = 20;
+      var baseLineLen = 80;
       var centerX = 500;
       var centerY = 380;
       var baseRad = Math.PI * 2 / data.children.length;
@@ -49,7 +50,7 @@
       for(var i = 0; i < data.children.length; i++){
         var cData = data.children[i];
         var weight = cData.weight > 4 ? cData.weight : cData.weight;
-        var l = weight * baseLineLen;
+        var l = weight * weightPerLength + baseLineLen;
         var cx = centerX + l * Math.sin(baseRad * i);
         var cy = centerY + l * Math.cos(baseRad * i);
         
@@ -78,22 +79,22 @@
     function createNodeCircle(){
       var r = 7;
       var circle = new createjs.Shape();
-      circle.graphics.beginRadialGradientFill(["#FCA000","#F8F28A"],[0,1], 0, 0, r, 0, 0, 0).drawCircle(0, 0, r);
-      circle.graphics.beginStroke("#FB4100").drawCircle(0, 0, r+1);
+      circle.graphics.beginFill("#d9eefe").drawCircle(0, 0, r);
+      circle.graphics.beginStroke("#979ca3").drawCircle(0, 0, r+1);
       return circle;
     }
     
     function createCenterCircle(){
-      var r = 10;
+      var r = 7;
       var circle = new createjs.Shape();
-      circle.graphics.beginStroke("#cccccc").drawCircle(0, 0, r+1);
-      circle.graphics.beginLinearGradientFill(["#006400","#6DA202"],[0,1], 0, 0, r, 0, 0, 0).drawCircle(0, 0, r);
+      circle.graphics.beginStroke("#a4998e").drawCircle(0, 0, r+1);
+      circle.graphics.beginFill("#ffe9c2").drawCircle(0, 0, r);
       return circle;
     }
     
     function createLine(x0, y0, x1, y1){
       var line = new createjs.Shape();
-      line.graphics.beginStroke("#cccccc").moveTo(x0,y0).lineTo(x1,y1);
+      line.graphics.beginStroke("#dddddd").moveTo(x0,y0).lineTo(x1,y1);
       return line;
     }
 
@@ -139,16 +140,17 @@
       console.log(x1,y1);
       
       function tick(event) {
+        var p = 0.15;
         var oldContainer = stage.getChildByName(view.currentContainerName);
         var newContainer = stage.getChildByName(view.newContainerName);
-        oldContainer.alpha = oldContainer.alpha - 0.05;
-        newContainer.alpha = newContainer.alpha + 0.05;
+        oldContainer.alpha = oldContainer.alpha - p;
+        newContainer.alpha = newContainer.alpha + p;
         
-        oldContainer.x =  oldContainer.x - (x1 - x0) * 0.05;
-        oldContainer.y =  oldContainer.y - (y1 - y0) * 0.05;
+        oldContainer.x =  oldContainer.x - (x1 - x0) * p;
+        oldContainer.y =  oldContainer.y - (y1 - y0) * p;
         
-        newContainer.x =  newContainer.x - (x1 - x0) * 0.05;
-        newContainer.y =  newContainer.y - (y1 - y0) * 0.05;
+        newContainer.x =  newContainer.x - (x1 - x0) * p;
+        newContainer.y =  newContainer.y - (y1 - y0) * p;
         
         stage.update(event);
         if(oldContainer.alpha <= 0){
