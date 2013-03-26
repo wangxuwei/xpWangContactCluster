@@ -20,7 +20,7 @@
         $canvas[0].width = $e.parent().width();
         $canvas[0].height = $e.parent().height();
 
-        var dataSet = app.createDataSet(50);
+        var dataSet = app.createDataSet(30);
         var chartData = app.transformData(dataSet);
         view.dataSet = dataSet;
         showView.call(view, chartData);
@@ -55,12 +55,35 @@
       var baseRad = Math.PI * 2 / data.children.length;
       var container = new createjs.Container();
       
+      var fpos = [];
       for(var i = 0; i < data.children.length; i++){
         var cData = data.children[i];
         var weight = cData.weight > 4 ? cData.weight : cData.weight;
         var l = weight * weightPerLength + baseLineLen;
         var cx = centerX + l * Math.sin(baseRad * i);
         var cy = centerY + l * Math.cos(baseRad * i);
+        fpos.push({x:cx, y:cy});
+        
+        var friendData = app.transformData(view.dataSet,cData.name);
+        for( j = i - 1; j >= 0; j--){
+          console.log(data.children[j].name, friendData);
+          for(var k = 0; k < friendData.children.length; k++){
+            var fData = friendData.children[k];
+            // has relation
+            if(fData.name == data.children[j].name){
+              var fLine = createLine.call(view,fpos[i].x,fpos[i].y,fpos[j].x,fpos[j].y);
+              container.addChild(fLine);
+              break;
+            }
+          }
+        }
+       
+      }
+      
+      for(var i = 0; i < data.children.length; i++){
+        var cx = fpos[i].x;
+        var cy = fpos[i].y;
+        var cData = data.children[i];
         
         var line = createLine.call(view,centerX,centerY,cx,cy);
         container.addChild(line);
@@ -78,6 +101,7 @@
          container.addChild(text);
       }
       
+            
       var centerCircle = createCenterCircle.call(view);
       centerCircle.name = view.cName;
       centerCircle.x = centerX;
