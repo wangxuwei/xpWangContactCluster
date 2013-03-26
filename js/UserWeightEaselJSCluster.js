@@ -20,7 +20,7 @@
         $canvas[0].width = $e.parent().width();
         $canvas[0].height = $e.parent().height();
 
-        var dataSet = app.createDataSet(30);
+        var dataSet = app.createDataSet(50);
         var chartData = app.transformData(dataSet);
         view.dataSet = dataSet;
         showView.call(view, chartData);
@@ -73,6 +73,9 @@
           var circleNode = e.target;
           changeCenterCircle.call(view,circleNode);
         });
+        
+         var text = createText.call(view,cx,cy, cData.name);
+         container.addChild(text);
       }
       
       var centerCircle = createCenterCircle.call(view);
@@ -81,18 +84,23 @@
       centerCircle.y = centerY;
       container.addChild(centerCircle);
       
+      var text = createText.call(view,centerX,centerY, data.name);
+      container.addChild(text); 
+
+      
       return container;
     }
     
-    function createNodeCircle(){
+    function createNodeCircle(name){
       var r = 7;
       var circle = new createjs.Shape();
       circle.graphics.beginFill("#d9eefe").drawCircle(0, 0, r);
       circle.graphics.beginStroke("#979ca3").drawCircle(0, 0, r+1);
+      circle.graphics
       return circle;
     }
     
-    function createCenterCircle(){
+    function createCenterCircle(name){
       var r = 7;
       var circle = new createjs.Shape();
       circle.graphics.beginStroke("#a4998e").drawCircle(0, 0, r+1);
@@ -104,6 +112,13 @@
       var line = new createjs.Shape();
       line.graphics.beginStroke("#dddddd").moveTo(x0,y0).lineTo(x1,y1);
       return line;
+    }
+    
+    function createText(x0, y0, name){
+      var text = new createjs.Text(name, "12px Arial, #000");
+      text.x = x0 - 10;
+      text.y = y0 + 20;
+      return text;
     }
 
     
@@ -176,7 +191,7 @@
       stage.update();
 
     }
-
+    
 
   })(jQuery);
 })();
