@@ -145,45 +145,37 @@
       var y0 = centerY;
       var x1 = newCircle.x;
       var y1 = newCircle.y;
-      console.log(x1,y1);
       
-      function tick(event) {
-        var p = 0.15;
-        var oldContainer = stage.getChildByName(view.currentContainerName);
-        var newContainer = stage.getChildByName(view.newContainerName);
-        oldContainer.alpha = oldContainer.alpha - p;
-        newContainer.alpha = newContainer.alpha + p;
-        
-        oldContainer.x =  oldContainer.x - (x1 - x0) * p;
-        oldContainer.y =  oldContainer.y - (y1 - y0) * p;
-        
-        newContainer.x =  newContainer.x - (x1 - x0) * p;
-        newContainer.y =  newContainer.y - (y1 - y0) * p;
-        
-        stage.update(event);
-        if(oldContainer.alpha <= 0){
+      var time = 800;
+      oldContainer.alpha = 1;
+      var ox = oldContainer.x - (x1 - x0);
+      var oy = oldContainer.y - (y1 - y0);
+      createjs.Tween.get(oldContainer).to({alpha : 0, x : ox, y : oy }, time,createjs.Ease.quartInOut); 
+      
+      createjs.Tween.get(newContainer).to({alpha : 1, x : 0, y : 0}, time,createjs.Ease.quartInOut).call(function() {
           animationEnd.call(view);
-          stage.update(event);
-        }
-      }
-      
-      function animationEnd(){
-        createjs.Ticker.removeEventListener("tick",tick);
-        var oldContainer = stage.getChildByName(view.currentContainerName);
-        var newContainer = stage.getChildByName(view.newContainerName);
-        
-        //remove oldContainer
-        newContainer.x = 0;
-        newContainer.y = 0;
-        stage.removeChild(oldContainer);
-        newContainer.name = view.currentContainerName;
-        newContainer.alpha = 1;
-        
-      }
+      }); 
 
-      createjs.Ticker.addEventListener("tick", tick);
+      createjs.Ticker.addEventListener("tick", stage);
     }
-    
+
+    function animationEnd() {
+      var view = this;
+      var stage = view.stage;
+      createjs.Ticker.removeEventListener("tick", view.stage);
+      var oldContainer = stage.getChildByName(view.currentContainerName);
+      var newContainer = stage.getChildByName(view.newContainerName);
+
+      //remove oldContainer
+      newContainer.x = 0;
+      newContainer.y = 0;
+      stage.removeChild(oldContainer);
+      newContainer.name = view.currentContainerName;
+      newContainer.alpha = 1;
+      
+      stage.update();
+
+    }
 
 
   })(jQuery);
