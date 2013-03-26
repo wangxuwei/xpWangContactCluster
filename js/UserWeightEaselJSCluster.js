@@ -3,16 +3,22 @@
   (function($) {
     brite.registerView("UserWeightEaselJSCluster", {
       emptyParent : true,
-      parent : ".MainScreen-main"
+      parent : ".MainScreen-main",
+      loadTmpl: false
     }, {
       create : function(data, config) {
-        var $html = app.render("tmpl-UserWeightEaselJSCluster");
-        var $e = $($html);
-        return $e;
+        var html = '<div class="UserWeightEaselJSCluster">'+
+                   '<canvas id="userWeightCanvas" ></canvas>'+
+                   '</div>';
+        var $e = $(html);
+        return html;
       },
       postDisplay : function(data, config) {
         var view = this;
         var $e = view.$el;
+        var $canvas = $e.find("#userWeightCanvas");
+        $canvas[0].width = $e.parent().width();
+        $canvas[0].height = $e.parent().height();
 
         var dataSet = app.createDataSet(30);
         var chartData = app.transformData(dataSet);
@@ -25,6 +31,8 @@
     function showView(data, $newDataView, offset) {
       var view = this;
       var $e = view.$el;
+      
+      
       var stage = new createjs.Stage("userWeightCanvas");
       view.stage = stage;
       view.currentContainerName = "currentContainer";

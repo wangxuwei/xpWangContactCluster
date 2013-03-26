@@ -27,12 +27,3 @@ Handlebars.templates['tmpl-UserWeightD3Cluster'] = Handlebars.template(function 
 
   return "<div class=\"UserWeightD3Cluster\">\n		<div class=\"UserWeightD3ClusterContainer\"></div>\n	</div>";}
 );
-
-// template --- tmpl-UserWeightEaselJSCluster ---
-Handlebars.templates['tmpl-UserWeightEaselJSCluster'] = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-  helpers = helpers || Handlebars.helpers;
-  
-
-
-  return "<div class=\"UserWeightEaselJSCluster\">\n		<div class=\"UserWeightEaselJSClusterContainer\">\n		  <canvas id=\"userWeightCanvas\" width=\"1000\" height=\"1000\"></canvas>\n		</div>\n	</div>";}
-);
