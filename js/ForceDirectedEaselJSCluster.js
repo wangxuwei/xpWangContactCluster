@@ -116,7 +116,6 @@
                   return ;
                 }
                 var tar = ce.target.target;
-                console.log(tar.x, tar.y);
                 for (var i = 0; i < lines.length; i++) {
                   var node = lines[i];
                   var line = olines[i];
@@ -167,7 +166,6 @@
           dataDfd.resolve(ret);
         });
       }
-      console.log(level);
       
       dataDfd.done(function(dataSource){
         var baseRad = Math.PI * 2 / dataSource.children.length;
