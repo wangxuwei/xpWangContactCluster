@@ -23,3 +23,11 @@ var app = app || {};
 	
 
 })(jQuery);
+
+(function($) {
+  
+  //create the data set
+  app.dataSet = app.createDataSet(300);
+  app.ContactDao = brite.registerDao(new brite.dao.ContactDaoHandler("Contact"));
+
+})(jQuery);

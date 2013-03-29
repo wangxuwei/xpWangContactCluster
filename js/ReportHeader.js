@@ -23,6 +23,8 @@
             		  	brite.display("UserWeightD3Cluster");
             		}else if(menu == "UserWeightEaselJSCluster"){
             		  	brite.display("UserWeightEaselJSCluster");
+            		}else if(menu == "ForceDirectedEaselJSCluster"){
+            		  	brite.display("ForceDirectedEaselJSCluster");
             		}
             	}
             }
