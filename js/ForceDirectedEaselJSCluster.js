@@ -107,26 +107,11 @@
             });
             
             evt.addEventListener("mouseup",function(ev) {
-              createjs.Tween.get(target).to({
-                x : ox,
-                y : oy
-              }, 1000, createjs.Ease.cubicInOut).addEventListener('change', function(ce) {
-                console.log(ce);
-                if(!ce){
-                  return ;
-                }
-                var tar = ce.target.target;
-                for (var i = 0; i < lines.length; i++) {
-                  var node = lines[i];
-                  var line = olines[i];
-                  line.graphics.clear().beginStroke("#585858").moveTo(node.x, node.y).lineTo(tar.x, tar.y);
-                }
-                stage.update();
-              }).call(function() {
-                createjs.Ticker.addEventListener("tick", stage);
+              
+              requestAnimationFrame(function(){
+                doSpring.call(view,target,ox,oy,ev.stageX,ev.stageY);
               });
-
-              stage.update();
+              
             });
             
           });
@@ -227,6 +212,63 @@
         }
       }
       return false;
+    }
+    
+    function doSpring(target,x0,y0,x1,y1,ang,length){
+      var view = this;
+      var stage = view.stage;
+      var sin_a = Math.abs(y1-y0) / Math.sqrt(Math.pow((x1-x0),2) + Math.pow((y1-y0),2));
+      var cos_a = Math.abs(x1-x0) / Math.sqrt(Math.pow((x1-x0),2) + Math.pow((y1-y0),2));
+      var a = (y0-y1) / (x0-x1);
+      var b = y0 - (a * x0);
+      var maxLength = Math.sqrt(Math.pow((x1-x0),2) + Math.pow((y1-y0),2));
+      if(maxLength > 130){
+        maxLength = 130;
+      }
+      
+      if(typeof length == 'undefined'){
+        length = maxLength;
+      }
+      if(typeof ang == 'undefined'){
+        ang = 0;
+      }
+      
+      var a = 20;
+      var l = 2;
+      ang = ang - a;
+      length = length - l;
+      
+      var ratio = Math.sin(ang * Math.PI / 180);
+      
+      var y = length * sin_a * ratio + y0;
+      var x = length * cos_a * ratio + x0;
+      console.log("=======");
+      console.log((x0-x1)/(y0-y1));
+      console.log((x0-x)/(y0-y));
+      target.x = x;
+      target.y = y;
+      
+      var lines = view.lines[x0+","+y0];
+      var olines = view.olines[x0+","+y0];
+      for (var i = 0; i < lines.length; i++) {
+        var node = lines[i];
+        var line = olines[i];
+        line.graphics.clear().beginStroke("#585858").moveTo(node.x, node.y).lineTo(x, y);
+      }
+
+      
+      stage.update();
+      
+      if(length > 0){
+        requestAnimationFrame(function(){
+          doSpring.call(view,target,x0,y0,x1,y1,ang,length);
+        });
+      }else{
+        target.x = x0;
+        target.y = y0;
+        stage.update();
+      }
+      
     }
 
   })(jQuery);
