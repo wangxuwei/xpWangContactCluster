@@ -2,7 +2,7 @@
 
   (function($) {
     var contactDao = brite.dao("Contact");
-    
+    var _colors = ["#2ca02c","#ff7f0e","#aec7e8","#1f77b4","#ff9896","#9467bd"];
     brite.registerView("ForceDirectedEaselJSCluster", {
       emptyParent : true,
       parent : ".MainScreen-main",
@@ -31,12 +31,18 @@
       var view = this;
       var $e = view.$el;
       view.nodes = [];
-      //{"cx,cy",[lines]}
+      view.circles = {};
+      view.linesNodes = {};
+      //{"cx,cy",[relatedNode]}
+      view.relatedNodes = {};
       view.lines = {};
-      view.olines = {};
+      view.baseNodeName = null;
+      view.originXY = {};
       var stage = new createjs.Stage("userWeightCanvas");
       view.stage = stage;
       view.LEVEL = 1;
+      var container = view.container = new createjs.Container();
+      stage.addChild(container);
       
       showFriendByNode.call(view,null,0).done(function(){
         
@@ -46,33 +52,33 @@
           for(var j = i-1; j >= 0; j--){
             var node1 = view.nodes[j];
             var line = createLine.call(view,node.x,node.y,node1.x,node1.y);
+            container.addChild(line);
+            view.linesNodes[node.name+","+node1.name]=line;
             
-            stage.addChild(line);
-            
-            var lines = view.lines[node.x+","+node.y];
-            var lines1 = view.lines[node1.x+","+node1.y];
-            var olines = view.olines[node.x+","+node.y];
-            var olines1 = view.olines[node1.x+","+node1.y];
+            var relatedNodes = view.relatedNodes[node.name];
+            var relatedNodes1 = view.relatedNodes[node1.name];
+            var lines = view.lines[node.name];
+            var lines1 = view.lines[node1.name];
+            if(!relatedNodes){
+              relatedNodes = [];
+              view.relatedNodes[node.name] = relatedNodes;
+            }
+            if(!relatedNodes1){
+              relatedNodes1 = [];
+              view.relatedNodes[node1.name] = relatedNodes1;
+            }
             if(!lines){
               lines = [];
-              view.lines[node.x+","+node.y] = lines;
+              view.lines[node.name] = lines;
             }
             if(!lines1){
               lines1 = [];
-              view.lines[node1.x+","+node1.y] = lines1;
+              view.lines[node1.name] = lines1;
             }
-            if(!olines){
-              olines = [];
-              view.olines[node.x+","+node.y] = olines;
-            }
-            if(!olines1){
-              olines1 = [];
-              view.olines[node1.x+","+node1.y] = olines1;
-            }
-            lines.push({x:node1.x,y:node1.y});
-            lines1.push({x:node.x,y:node.y});
-            olines.push(line);
-            olines1.push(line);
+            relatedNodes.push(node1);
+            relatedNodes1.push(node);
+            lines.push(line);
+            lines1.push(line);
           }
           
         }
@@ -81,35 +87,50 @@
           var node = view.nodes[i];
           
           //draw nodes
-          var c = createNodeCircle.call(view);
+          var c = createNodeCircle.call(view,node.name);
           c.x = node.x;
           c.y = node.y;
-          stage.addChild(c);
+          container.addChild(c);
+          view.originXY[node.name] = {x:c.x,y:c.y};
+          view.circles[node.name] = c;
           
           c.addEventListener("mousedown",function(evt){
             var target = evt.target;
             var ox = target.x;
             var oy = target.y;
-            var lines = view.lines[ox+","+oy];
-            var olines = view.olines[ox+","+oy];
+            var relatedNodes = view.relatedNodes[target.name];
+            var lines = view.lines[target.name];
             var offset = {x:target.x-evt.stageX, y:target.y-evt.stageY};
             evt.addEventListener("mousemove",function(ev) {
+              var offsetX = ev.stageX - target.x + offset.x;
+              var offsetY = ev.stageY - target.y + offset.y;
+              
               target.x = ev.stageX+offset.x;
               target.y = ev.stageY+offset.y;
               
-              for(var i = 0; i < lines.length; i++){
-                var node = lines[i];
-                var line = olines[i];
-                line.graphics.clear().beginStroke("#585858").moveTo(node.x,node.y).lineTo(target.x,target.y);
-              }
+              forceNode.call(view,target.name,offsetX,offsetY);
+              drawLine.call(view);
               
               stage.update();
             });
             
             evt.addEventListener("mouseup",function(ev) {
-              
               requestAnimationFrame(function(){
+                
+                var fx = view.circles[view.baseNodeName].x - view.originXY[view.baseNodeName].x;
+                var fy = view.circles[view.baseNodeName].y - view.originXY[view.baseNodeName].y;
+                for(var i = 0; i < view.nodes.length; i++){
+                  if(view.baseNodeName != view.nodes[i].name){
+                    var cir = view.circles[view.nodes[i].name];
+                    var nx = cir.x;
+                    var ny = cir.y;
+                    cir.x = view.originXY[view.nodes[i].name].x + fx;
+                    cir.y = view.originXY[view.nodes[i].name].y + fy;
+                    doSpring.call(view,cir,cir.x,cir.y,nx,ny);
+                  }
+                }
                 doSpring.call(view,target,ox,oy,ev.stageX,ev.stageY);
+                
               });
               
             });
@@ -192,15 +213,17 @@
     function createNodeCircle(name){
       var r = 4;
       var circle = new createjs.Shape();
-      circle.graphics.beginFill("#5ca818").drawCircle(0, 0, r);
+      var index = Math.floor(Math.random() * 5);
+      circle.graphics.beginFill(_colors[index]).drawCircle(0, 0, r);
       circle.graphics.beginStroke("#cccccc").drawCircle(0, 0, r+1);
-      circle.graphics
+      circle.name = name;
       return circle;
     }
     
     function createLine(x0, y0, x1, y1){
       var line = new createjs.Shape();
-      line.graphics.beginStroke("#585858").moveTo(x0,y0).lineTo(x1,y1);
+      line.name = new Date() * 1 + "";
+      line.graphics.beginStroke("#c6c6c6").moveTo(x0,y0).lineTo(x1,y1);
       return line;
     }
     
@@ -217,13 +240,13 @@
     function doSpring(target,x0,y0,x1,y1,ang,length){
       var view = this;
       var stage = view.stage;
-      var sin_a = Math.abs(y1-y0) / Math.sqrt(Math.pow((x1-x0),2) + Math.pow((y1-y0),2));
-      var cos_a = Math.abs(x1-x0) / Math.sqrt(Math.pow((x1-x0),2) + Math.pow((y1-y0),2));
+      var sin_a = (y1-y0) / Math.sqrt(Math.pow((x1-x0),2) + Math.pow((y1-y0),2));
+      var cos_a = (x1-x0) / Math.sqrt(Math.pow((x1-x0),2) + Math.pow((y1-y0),2));
       var a = (y0-y1) / (x0-x1);
       var b = y0 - (a * x0);
       var maxLength = Math.sqrt(Math.pow((x1-x0),2) + Math.pow((y1-y0),2));
       if(maxLength > 130){
-        maxLength = 130;
+        maxLength = 100;
       }
       
       if(typeof length == 'undefined'){
@@ -233,8 +256,8 @@
         ang = 0;
       }
       
-      var a = 20;
-      var l = 2;
+      var a = 10;
+      var l = 1;
       ang = ang - a;
       length = length - l;
       
@@ -242,18 +265,16 @@
       
       var y = length * sin_a * ratio + y0;
       var x = length * cos_a * ratio + x0;
-      console.log("=======");
-      console.log((x0-x1)/(y0-y1));
-      console.log((x0-x)/(y0-y));
       target.x = x;
       target.y = y;
       
-      var lines = view.lines[x0+","+y0];
-      var olines = view.olines[x0+","+y0];
-      for (var i = 0; i < lines.length; i++) {
-        var node = lines[i];
-        var line = olines[i];
-        line.graphics.clear().beginStroke("#585858").moveTo(node.x, node.y).lineTo(x, y);
+      var relatedNodes = view.relatedNodes[target.name];
+      var lines = view.lines[target.name];
+      for (var i = 0; i < relatedNodes.length; i++) {
+        var node = relatedNodes[i];
+        var circle = view.circles[node.name];
+        var line = lines[i];
+        line.graphics.clear().beginStroke("#c6c6c6").moveTo(circle.x, circle.y).lineTo(x, y);
       }
 
       
@@ -270,6 +291,46 @@
       }
       
     }
+    
+    function forceNode(nodeName,fx, fy,useNodesName){
+      var view = this;
+      var reduce = 0.7;
+      if(typeof useNodesName == 'undefined'){
+        useNodesName = [];
+      }
+      fx = reduce * fx;
+      fy = reduce * fy;
+      var relatedNodes = view.relatedNodes[nodeName];
+      for (var i = 0; i < relatedNodes.length; i++) {
+        var rnode = relatedNodes[i];
+        if($.inArray(rnode.name,useNodesName) == -1){
+          useNodesName.push(rnode.name);
+          
+          //get Basic Node
+          if(useNodesName.length == view.nodes.length - 1){
+            view.baseNodeName = rnode.name;
+          }
+          
+          var circle = view.circles[rnode.name];
+          circle.x = circle.x + fx;
+          circle.y = circle.y + fy;
+          forceNode.call(view,rnode.name,fx,fy,useNodesName);
+        }
+      }
+    }
+    
+    
+    function drawLine() {
+      var view = this;
+      for (var k in view.linesNodes) {
+        var nodes = k.split(",");
+        var line = view.linesNodes[k];
+        var cs = view.circles[nodes[0]];
+        var ce = view.circles[nodes[1]];
+        line.graphics.clear().beginStroke("#c6c6c6").moveTo(cs.x, cs.y).lineTo(ce.x, ce.y);
+      }
+    }
+
 
   })(jQuery);
 })();
