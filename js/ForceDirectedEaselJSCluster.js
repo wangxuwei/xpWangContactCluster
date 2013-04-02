@@ -41,6 +41,8 @@
       var stage = new createjs.Stage("userWeightCanvas");
       view.stage = stage;
       view.LEVEL = 1;
+      view.initCetnerX = 500;
+      view.initCetnerY = 380;
       var container = view.container = new createjs.Container();
       stage.addChild(container);
       
@@ -139,7 +141,12 @@
           
         }
         
-        stage.update();
+
+        requestAnimationFrame(function() {
+          start.call(view, 50);
+        }); 
+
+        
       });
       
       
@@ -150,8 +157,8 @@
       var stage = view.stage;
       var weightPerLength = 15;
       var baseLineLen = 40;
-      var centerX = 500;
-      var centerY = 380;
+      var centerX = view.initCetnerX;
+      var centerY = view.initCetnerY;
       if(typeof x != 'undefined'){
         centerX = x;
       }
@@ -330,6 +337,35 @@
         line.graphics.clear().beginStroke("#c6c6c6").moveTo(cs.x, cs.y).lineTo(ce.x, ce.y);
       }
     }
+    
+    
+    function start(frame) {
+      var view = this;
+      var centerX = view.initCetnerX;
+      var centerY = view.initCetnerY;
+      for (var j = 0; j < view.nodes.length; j++) {
+        var circle = view.circles[view.nodes[j].name];
+        var x = (Math.random() - 0.5) * 5 * frame + view.originXY[circle.name].x;
+        var y = (Math.random() - 0.5) * 2.5 * frame + view.originXY[circle.name].y;
+        if (frame == 1) {
+          x = view.originXY[circle.name].x;
+          y = view.originXY[circle.name].y;
+        }
+        circle.x = x;
+        circle.y = y;
+      }
+      drawLine.call(view);
+      
+      view.stage.update();
+      
+      frame--;
+      if(frame > 0){
+        requestAnimationFrame(function() {
+          start.call(view, frame);
+        }); 
+      }
+    }
+
 
 
   })(jQuery);
